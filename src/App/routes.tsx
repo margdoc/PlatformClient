@@ -1,7 +1,10 @@
 import * as History from '../_utils/history';
+import { Loop, mapEffect, EMPTY } from '../_utils/loop';
 
 import * as HomePage from './HomePage';
 import * as LoginPage from './LoginPage';
+
+import * as App from './App';
 
 interface HomePageRoute {
   type: "HomePageRoute";
@@ -19,9 +22,43 @@ export type Route =
 ;
   
 export const routeFromLocation = (location: Array<string>): Route => {
-  return { type: "NotFound"}
+  const paths = location.filter(item => item !== "");
+    
+  if (paths.length === 0)
+    return { type: "HomePageRoute" };
+
+  switch (paths[0]) {
+    case "login":
+      return { type: "LoginPageRoute" };
+    default:
+      return { type: "NotFound"};
+  }
 }
 
 export const locationFromRoute = (route: Route): Partial<History.Location> => {
-  return { paths: [] }
+  switch (route.type) {
+    case "HomePageRoute":
+      return { paths: [] };
+    case "LoginPageRoute":
+      return { paths: ["login"] };
+    case "NotFound":
+      return { paths: ["not-found"] }
+  }
+}
+
+export const routeChanged = (route: Route): Loop<App.Page, App.Action> => {
+  switch (route.type) {
+    case "HomePageRoute":
+      return mapEffect(HomePage.initialLoop, action => ({
+        type: "HomePageAction",
+        action
+      }))
+    case "LoginPageRoute":
+      return mapEffect(LoginPage.initialLoop, action => ({
+        type: "LoginPageAction",
+        action
+      }))
+    case "NotFound":
+      return [{ type: "NotFound" }, EMPTY];
+  }
 }

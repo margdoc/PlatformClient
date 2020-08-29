@@ -1,5 +1,6 @@
 import { Action } from 'redux';
 import { Cmd, CmdType, Loop as ReduxLoop } from "redux-loop";
+import { Switch } from 'react-router-dom';
 
 export const EmptyAction: Action = {
     type: "EmptyAction",
@@ -106,6 +107,12 @@ export const getEffect = <S, A extends Action>(loop: Loop<S, A>): Effect<A> => l
 
 export const loopToReduxLoop = <S, A extends Action>(loop: Loop<S, A>): ReduxLoop<S> => 
     [getState(loop), effectToCmd(getEffect(loop))]; 
+
+
+export const mapState = <S1, S2, A extends Action>(
+    loop: Loop<S1, A>,
+    mapper: (state: S1) => S2
+): Loop<S2, A> => [mapper(getState(loop)), getEffect(loop)];
 
 
 export const mapEffect = <S, A1 extends Action, A2 extends Action>(

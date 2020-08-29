@@ -4,20 +4,20 @@ import { fetchFormRequest } from '../../_utils';
 import { runAndDispatch } from '../../_utils/loop';
 import { AUTH_URL } from './index';
 
-export interface LoginRequest {
+export interface LogInRequest {
   username: string;
   password: string;
 }
 
-export interface LoginResponse {
+export interface LogInResponse {
   access_token: string;
   token_type: string;
 }
 
-const loginRequest = <A extends Action>(request: LoginRequest, onResponse: (response: LoginResponse) => A) => {
-  return fetchFormRequest<LoginRequest, LoginResponse>(AUTH_URL + 'login', request)
+const loginRequest = <A extends Action>(request: LogInRequest, onResponse: (response: LogInResponse) => A) => {
+  return fetchFormRequest<LogInRequest, LogInResponse>(AUTH_URL + 'login', request)
     .then(onResponse);
 }
 
-export const apiLogin = <A extends Action>(request: LoginRequest, onResponse: (response: LoginResponse) => A) => 
+export const apiLogin = <A extends Action>(request: LogInRequest, onResponse: (response: LogInResponse) => A) => 
   runAndDispatch(() => loginRequest(request, onResponse));

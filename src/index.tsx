@@ -52,7 +52,7 @@ const reducer: LoopReducer<State, Action> = (prevState: State, action: Action)=>
 
 const initialState: State = {
     type: "AppState",
-    app: App.initialState
+    app: App.initialLoop[0]
 };
 
 //@ts-ignore
@@ -72,6 +72,7 @@ const enhancer = composeEnhancers(
 
 const store = enhancedStoreCreator(liftedReducer, initialState, enhancer);
 
+store.dispatch({ type: "AppAction", action: { type: "InitAction" } });
 
 // History
 const locationChanged = (location: History.HistoryLocation) =>
@@ -83,8 +84,6 @@ const locationChanged = (location: History.HistoryLocation) =>
 locationChanged(History.history.location);
 
 History.history.listen(locationChanged);
-
-
 
 const state$ = new Observable(store[Symbol.observable]().subscribe);
 
