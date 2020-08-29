@@ -1,5 +1,5 @@
 import React from 'react';
-import { Loop, LoopReducer, EMPTY } from '../../_utils/loop';
+import { Loop, LoopReducer, EMPTY } from '../../utils/loop';
 
 export interface State {
   type: "HomePageState";

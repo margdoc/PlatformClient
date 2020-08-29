@@ -1,3 +1,5 @@
+import { Action } from 'redux';
+
 import { fetchJSONRequest } from '../../utils';
 import { AUTH_URL } from './index';
 
@@ -19,7 +21,7 @@ export interface RegisterResponse {
   lastname: string;
 }
 
-export const registerRequest = <A>(request: RegisterRequest, onResponse: (response: RegisterResponse) => A) => {
-  fetchJSONRequest<RegisterRequest, RegisterResponse>(AUTH_URL + 'register', request)
+export const registerRequest = <A extends Action>(request: RegisterRequest, onResponse: (response: RegisterResponse) => A) => {
+  fetchJSONRequest<RegisterRequest, RegisterResponse>(AUTH_URL + 'register', request, 'POST')
     .then(onResponse);
 }

@@ -1,10 +1,11 @@
 import React, { useEffect } from 'react';
+import Button from 'react-bootstrap/Button'
 
-import { Loop, EMPTY, LoopReducer, mapLoop, getState, mapState, defer } from '../utils/loop';
-import * as History from '../utils/history';
+import { Loop, EMPTY, LoopReducer, mapLoop, getState, mapState, defer, batch } from '../utils/loop';
+import { AuthToken, getAuthToken, setAuthToken, removeAuthToken } from '../utils/auth-token';
 import * as HomePage from './HomePage';
 import * as LoginPage from './LoginPage';
-import { AuthClient } from '../services';
+import { AuthClient, UserClient } from '../services';
 
 import { Route, routeFromLocation, routeChanged } from './routes';
 
@@ -21,7 +22,13 @@ interface LoggedOffState {
 }
 
 interface UserData {
-
+  username: string;
+  email: string;
+  id: string;
+  is_active: boolean;
+  is_superuser: boolean;
+  name: string;
+  lastname: string;
 }
 
 interface LoggedInState {
@@ -61,12 +68,12 @@ interface FetchLocalStorage {
 
 interface LocalStorageLogIn {
   type: "LocalStorageLogIn";
-  authToken?: AuthClient.AuthToken; 
+  authToken?: AuthToken; 
 }
 
 interface GotUserData {
   type: "GotUserData";
-  data: AuthClient.UserDataResponse;
+  data: UserClient.UserDataResponse;
 }
 
 interface RouteChanged {
@@ -120,7 +127,7 @@ export const reducer: LoopReducer<State, Action> = (prevState, action) => {
       case "FetchLocalStorage":
         return [prevState, defer<LocalStorageLogIn>({
           type: "LocalStorageLogIn",
-          authToken: AuthClient.getAuthToken(),
+          authToken: getAuthToken(),
         })];
       case "LocalStorageLogIn":
         return action.authToken === undefined 
@@ -136,7 +143,7 @@ export const reducer: LoopReducer<State, Action> = (prevState, action) => {
               page,
             }
           })),
-          AuthClient.apiUserData<GotUserData>(response => ({
+          UserClient.apiUserData<GotUserData>(response => ({
             type: "GotUserData",
             data: response,
           }))
@@ -151,7 +158,22 @@ export const reducer: LoopReducer<State, Action> = (prevState, action) => {
     }
   }
   else {
+    if (action.type === "LogInResponse") {
+      //@ts-ignore
+      setAuthToken(action.response.access_token, action.response.token_type);
+
+      return [{
+        type: "LoggedInState",
+        page: HomePage.initialLoop[0],
+      }, UserClient.apiUserData<GotUserData>(response => ({
+        type: "GotUserData",
+        data: response,
+      }))];
+    }
+
     if (action.type === "LogOutResponse") {
+      removeAuthToken();
+
       return [{
           type: "LoggedOffState",
           route: {
@@ -161,6 +183,15 @@ export const reducer: LoopReducer<State, Action> = (prevState, action) => {
         },
         EMPTY,
       ];
+    }
+
+    if (action.type === "GotUserData") {
+      return [{
+        ...prevState,
+        userData: {
+          ...action.data
+        }
+      }, EMPTY];
     }
   
     if (
@@ -190,10 +221,20 @@ export const reducer: LoopReducer<State, Action> = (prevState, action) => {
           ...prevState,
           page: loginPage
         }),
-        loginPageAction => ({
-          type: "LoginPageAction",
-          action: loginPageAction,
-        })
+        loginPageAction => {
+          if (
+            loginPageAction.type === "LoginResponse" &&
+            loginPageAction.response.type === "LogInSuccessResponse")
+            return {
+              type: "LogInResponse",
+              response: loginPageAction.response
+            }
+          else
+            return {
+              type: "LoginPageAction",
+              action: loginPageAction,
+            };
+        }
       )
     }
   }
@@ -219,8 +260,19 @@ export const initialLoop: Loop<State, Action> = [{
 
 export const render: React.FunctionComponent<Props> = ({ state, dispatch }) => {
   const getNavbar = () => {
-    
-  }
+    return <>
+      <Button href="/">Home</Button>
+      { state.type === "LoggedInState" 
+        ? <>
+          <Button>{state.userData?.username || "..."}</Button>
+          <Button onClick={() => {
+            dispatch({ type: "LogOutResponse" })
+          }}>Logout</Button>
+        </>
+        : <Button href="/login">Login</Button>
+      }
+    </>
+  };
 
   const getContent = () => {
     if (state.type === "FetchingLocalStorageState")
@@ -230,7 +282,12 @@ export const render: React.FunctionComponent<Props> = ({ state, dispatch }) => {
       case "HomePageState":
         return <HomePage.render />;
       case "LoginPageState":
-          return <LoginPage.render />
+          return <LoginPage.render dispatch={(action: LoginPage.Action) => {
+            dispatch({
+              type: "LoginPageAction",
+              action
+            });
+          }} />
       default:
         return <div>Not Found</div>;
     }

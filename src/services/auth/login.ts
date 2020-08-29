@@ -9,14 +9,29 @@ export interface LogInRequest {
   password: string;
 }
 
-export interface LogInResponse {
+export interface LogInErrorResponse {
+  type: "LogInErrorResponse";
+  detail: string;
+}
+
+export interface LogInSuccessResponse {
+  type: "LogInSuccessResponse";
   access_token: string;
   token_type: string;
 }
 
+export interface LogInRequestResponse {
+  access_token: string;
+  token_type: string;
+}
+
+export type LogInResponse = LogInSuccessResponse | LogInErrorResponse;
+
 const loginRequest = <A extends Action>(request: LogInRequest, onResponse: (response: LogInResponse) => A) => {
-  return fetchFormRequest<LogInRequest, LogInResponse>(AUTH_URL + 'login', request)
-    .then(onResponse);
+  return fetchFormRequest<LogInRequest, LogInRequestResponse>(AUTH_URL + 'login', request, 'POST')
+    .then(response => typeof response === "string" 
+    ? onResponse({ type: "LogInErrorResponse", detail: response }) 
+    : onResponse({ ...response, type: "LogInSuccessResponse" }));
 }
 
 export const apiLogin = <A extends Action>(request: LogInRequest, onResponse: (response: LogInResponse) => A) => 

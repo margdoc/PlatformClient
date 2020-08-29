@@ -72,7 +72,10 @@ const enhancer = composeEnhancers(
 
 const store = enhancedStoreCreator(liftedReducer, initialState, enhancer);
 
-store.dispatch({ type: "AppAction", action: { type: "InitAction" } });
+const appDispatch = (action: App.Action) =>
+    store.dispatch({ type: "AppAction", action });
+
+appDispatch({ type: "InitAction" })
 
 // History
 const locationChanged = (location: History.HistoryLocation) =>
@@ -91,9 +94,7 @@ state$.subscribe(state => {
     render(
         <App.render 
             state={state.app} 
-            dispatch={(action: App.Action) => 
-                store.dispatch({ type: "AppAction", action })
-            } 
+            dispatch={appDispatch} 
         />,
         document.getElementById('root')
     )

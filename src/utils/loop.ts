@@ -66,7 +66,7 @@ class RunAndDispatch<A extends Action> implements Effect<A> {
         successActionCreator: result => result,
     });
 
-    map = <B extends Action>(mapper: (action: A) => B) => 
+    map = <B extends Action>(mapper: (action: A) => B) =>
         new RunAndDispatch(() => this.func().then(mapper));
 }
 
@@ -93,8 +93,24 @@ class EmptyEffect implements Effect<never> {
 
 export const EMPTY = new EmptyEffect();
 
-export const effectToCmd = <A extends Action>(effect: Effect<A>) => effect.toCmd();
+class Batch<A extends Action> implements Effect<A> {
+    constructor(readonly effects: Array<Effect<A>>) {}
 
+    readonly type = "Effect/Batch";
+    readonly toCmd = () => Cmd.list(
+        this.effects.map(effectToCmd),
+        { batch: true }
+    )
+
+    map = <B extends Action>(mapper: (action: A) => B) =>
+        new Batch(this.effects.map(effect => effect.map(mapper)));
+}
+
+export const batch = <A extends Action>(effects: Array<Effect<A>>) =>
+    new Batch(effects);
+
+
+export const effectToCmd = <A extends Action>(effect: Effect<A>) => effect.toCmd();
 
 export type Loop<S, A extends Action> = [S, Effect<A>];
 

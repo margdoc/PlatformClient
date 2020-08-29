@@ -1,8 +1,8 @@
 import { Action } from 'redux';
 
-import { fetchJSONRequest } from '../../_utils';
-import { runAndDispatch } from '../../_utils/loop';
-import { AUTH_URL } from './index';
+import { fetchJSONRequest } from '../../utils';
+import { runAndDispatch } from '../../utils/loop';
+import { USERS_URL } from './index';
 
 export interface UserDataResponse {
   id: string;
@@ -15,7 +15,7 @@ export interface UserDataResponse {
 }
 
 const userDataRequest = <A extends Action>(onResponse: (response: UserDataResponse) => A) => {
-  return fetchJSONRequest<null, UserDataResponse>(AUTH_URL + 'login', null, true)
+  return fetchJSONRequest<null, UserDataResponse>(USERS_URL + 'me', null, 'GET', true)
     .then(onResponse);
 }
 
