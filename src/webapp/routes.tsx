@@ -1,5 +1,5 @@
-import * as History from '../_utils/history';
-import { Loop, mapEffect, EMPTY } from '../_utils/loop';
+import * as History from '../utils/history';
+import { Loop, mapEffect, EMPTY } from '../utils/loop';
 
 import * as HomePage from './HomePage';
 import * as LoginPage from './LoginPage';

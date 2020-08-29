@@ -1,6 +1,6 @@
 import React from 'react';
-import { AuthClient } from '../../_services/'; 
-import { Loop, LoopReducer, EMPTY } from '../../_utils/loop';
+import { AuthClient } from '../../services'; 
+import { Loop, LoopReducer, EMPTY } from '../../utils/loop';
 
 export interface State {
   type: "LoginPageState";

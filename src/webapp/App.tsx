@@ -1,10 +1,10 @@
 import React, { useEffect } from 'react';
 
-import { Loop, EMPTY, LoopReducer, mapLoop, getState, mapState, defer } from '../_utils/loop';
-import * as History from '../_utils/history';
+import { Loop, EMPTY, LoopReducer, mapLoop, getState, mapState, defer } from '../utils/loop';
+import * as History from '../utils/history';
 import * as HomePage from './HomePage';
 import * as LoginPage from './LoginPage';
-import { AuthClient } from '../_services';
+import { AuthClient } from '../services';
 
 import { Route, routeFromLocation, routeChanged } from './routes';
 

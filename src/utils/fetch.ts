@@ -1,5 +1,5 @@
 import fetch, { RequestInit } from 'node-fetch';
-import { getAuthToken, authHeader } from '../_services/auth';
+import { getAuthToken, authHeader } from '../services/auth';
 
 export const fetchFormRequest = <Rq, Rs>(url: string, request: Rq): Promise<Rs> => {
   const params = new URLSearchParams();

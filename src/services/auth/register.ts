@@ -1,4 +1,4 @@
-import { fetchJSONRequest } from '../../_utils';
+import { fetchJSONRequest } from '../../utils';
 import { AUTH_URL } from './index';
 
 export interface RegisterRequest {

@@ -1,7 +1,7 @@
 import { Action } from 'redux';
 
-import { fetchFormRequest } from '../../_utils';
-import { runAndDispatch } from '../../_utils/loop';
+import { fetchFormRequest } from '../../utils';
+import { runAndDispatch } from '../../utils/loop';
 import { AUTH_URL } from './index';
 
 export interface LogInRequest {

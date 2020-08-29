@@ -6,10 +6,10 @@ import { createStore, applyMiddleware, compose } from 'redux';
 import thunkMiddleware from 'redux-thunk';
 import { Loop as ReduxLoop, install, LoopReducer as ReduxLoopReducer, StoreCreator } from 'redux-loop';
 
-import { mapLoop, Loop, loopToReduxLoop, EMPTY, LoopReducer, getState } from './_utils/loop';
-import * as History from './_utils/history';
+import { mapLoop, Loop, loopToReduxLoop, EMPTY, LoopReducer, getState } from './utils/loop';
+import * as History from './utils/history';
 
-import * as App from './App';
+import * as App from './webapp';
 
 
 interface State {
