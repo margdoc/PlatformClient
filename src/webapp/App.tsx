@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import Button from 'react-bootstrap/Button'
+import { Button, Navbar, Nav, Spinner } from 'react-bootstrap';
 
 import { Loop, EMPTY, LoopReducer, mapLoop, getState, mapState, defer, batch } from '../utils/loop';
 import { AuthToken, getAuthToken, setAuthToken, removeAuthToken } from '../utils/auth-token';
@@ -8,7 +8,7 @@ import * as LoginPage from './LoginPage';
 import * as RegisterPage from './RegisterPage';
 import { AuthClient, UserClient } from '../services';
 
-import { Route, routeFromLocation, routeChanged } from './routes';
+import { Route, routeFromLocation, routeChanged, locationFromRoute } from './routes';
 
 export type Page =
   | { type: "NotFound" }
@@ -36,6 +36,7 @@ interface UserData {
 interface LoggedInState {
   type: "LoggedInState";
   page: Page;
+  route: Route;
   userData?: UserData;
 }
 
@@ -149,6 +150,7 @@ export const reducer: LoopReducer<State, Action> = (prevState, action) => {
             return {
               type: "LoggedInState",
               page,
+              route: newRoute
             }
           })),
           UserClient.apiUserData<GotUserData>(response => ({
@@ -173,6 +175,7 @@ export const reducer: LoopReducer<State, Action> = (prevState, action) => {
       return [{
         type: "LoggedInState",
         page: HomePage.initialLoop[0],
+        route: { type: "HomePageRoute" }
       }, UserClient.apiUserData<GotUserData>(response => ({
         type: "GotUserData",
         data: response,
@@ -275,32 +278,84 @@ export const initialLoop: Loop<State, Action> = [{
   }, defer<FetchLocalStorage>({ type: "FetchLocalStorage" })
 ];
 
+type NavPage = "HomePageRoute" | "LoginPageRoute" | "RegisterPageRoute" | "ProfilePage" | "Logout";
+
+const navPageToRoute = (page: NavPage): Route => {
+  switch (page) {
+    case "HomePageRoute":
+      return { type: "HomePageRoute" };
+    case "LoginPageRoute":
+      return { type: "LoginPageRoute" };
+    case "RegisterPageRoute":
+      return { type: "RegisterPageRoute" };
+    default:
+      return { type: "NotFound" };
+  }
+}
+
+interface NavProps {
+  page: NavPage;
+  text: string;
+}
+
+const NavLink: React.FunctionComponent<NavProps> = ({ page, text }) => {
+  const route = navPageToRoute(page);
+  const paths = locationFromRoute(route).paths;
+
+  const location = '/'.concat(
+    paths !== undefined
+      ? paths.join('/')
+      : ''
+  );
+
+  return <Nav.Item>
+    <Nav.Link 
+      eventKey={route} 
+      href={location}
+    >
+      {text}
+    </Nav.Link>
+  </Nav.Item>
+}
+
 export const render: React.FunctionComponent<Props> = ({ state, dispatch }) => {
   const getNavbar = () => {
-    return <>
-      <Button href="/"
-        onClick={() => {
-          dispatch({ type: "RouteChanged", route: { type: "HomePageRoute" } })
-        }}>Home</Button>
-      { state.type === "LoggedInState" 
-        ? <>
-          <Button>{state.userData?.username || "..."}</Button>
-          <Button onClick={() => {
-            dispatch({ type: "LogOutResponse" })
-          }}>Logout</Button>
-        </>
-        : <>
-          <Button href="/login"
-            onClick={() => {
-              dispatch({ type: "RouteChanged", route: { type: "LoginPageRoute" } })
-            }}>Login</Button>
-          <Button href="/register"
-            onClick={() => {
-              dispatch({ type: "RouteChanged", route: { type: "RegisterPageRoute" } })
-            }}>Register</Button>
-        </>
-      }
-    </>
+    if (state.type === "FetchingLocalStorageState")
+      return <Navbar bg="light" expand="lg">
+        <Nav.Item>
+          <Spinner animation="border" role="status" />Loading...
+        </Nav.Item>
+      </Navbar>
+
+
+    return <Navbar bg="light" expand="lg">
+      <Nav 
+        activeKey={state.route.type}
+        onSelect={(eventKey: any) => {
+            const page = eventKey as NavPage; 
+
+            if (page === "Logout")
+              dispatch({ type: "LogOutResponse" });
+            else
+              dispatch({
+                type: "RouteChanged",
+                route: navPageToRoute(page)
+              });
+          }}
+      >
+        <NavLink page={"HomePageRoute"} text={"Home"} />
+        { state.type === "LoggedInState"
+          ? <>
+            <NavLink page={"ProfilePage"} text={state.userData?.username || "..."} />
+            <NavLink page={"Logout"} text={"Logout"} />
+          </>
+          : <>
+            <NavLink page={"LoginPageRoute"} text={"Login"} />
+            <NavLink page={"RegisterPageRoute"} text={"Register"} />
+          </>
+        }
+      </Nav>
+    </Navbar>
   };
 
   const getContent = () => {
