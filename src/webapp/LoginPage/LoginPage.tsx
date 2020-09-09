@@ -1,8 +1,8 @@
 import React from 'react';
-import { Button, Form } from 'react-bootstrap'
+import { Button, Form } from 'react-bootstrap';
+import styled from 'styled-components';
 import { AuthClient } from '../../services'; 
 import { Loop, LoopReducer, EMPTY } from '../../utils/loop';
-import { setAuthToken } from '../../utils/auth-token';
 
 import { Route } from '../index';
 
@@ -44,28 +44,33 @@ interface Props {
   dispatch: (action: Action) => void;
 }
 
+const FormWrapper = styled.div`
+`;
+
 export const render: React.FunctionComponent<Props> = ({ dispatch }) => {
   const emailInput = React.createRef<HTMLInputElement>();
   const passwordInput = React.createRef<HTMLInputElement>();
 
-  return <Form>
-    <Form.Group controlId="loginForm">
-      <Form.Control type="email" placeholder="Enter email" ref={emailInput} />
-      <Form.Control type="password" placeholder="Enter password" ref={passwordInput} />
-    </Form.Group>
-    <Button variant="primary" type="button" onClick={() => {
-      if (emailInput.current === null || passwordInput.current === null)
-        return;
+  return <FormWrapper>
+      <Form>
+        <Form.Group controlId="loginForm">
+          <Form.Control type="email" placeholder="Email" ref={emailInput} />
+          <Form.Control type="password" placeholder="Password" ref={passwordInput} />
+        </Form.Group>
+        <Button variant="primary" type="button" onClick={() => {
+          if (emailInput.current === null || passwordInput.current === null)
+            return;
 
-      dispatch({
-        type: "LoginRequest",
-        request: {
-          username: emailInput.current.value,
-          password: passwordInput.current.value,
-        }
-      });
-    }}>
-      Login
-    </Button>
-  </Form>;
+          dispatch({
+            type: "LoginRequest",
+            request: {
+              username: emailInput.current.value,
+              password: passwordInput.current.value,
+            }
+          });
+        }}>
+          Login
+        </Button>
+      </Form>
+    </FormWrapper>;
 }

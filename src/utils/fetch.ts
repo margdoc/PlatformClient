@@ -30,7 +30,19 @@ export const fetchFormRequest = <Rq, Rs>(url: string, request: Rq, method: strin
     });
 }
 
-export const fetchJSONRequest = <Rq, Rs>(url: string, request: Rq, method: string, auth: boolean = false): Promise<Rs> => {
+interface ResponseOk<R> {
+  type: "Ok";
+  response: R;
+}
+
+interface ResponseError<R> {
+  type: "Error";
+  response: R;
+}
+
+type Response<Ro, Re> = ResponseOk<Ro> | ResponseError<Re>;
+
+export const fetchJSONRequest = <Rq, Rs, Rse>(url: string, request: Rq, method: string, auth: boolean = false): Promise<Response<Rs, Rse>> => {
   if (auth && getAuthToken() === undefined)
     throw new Error("You aren't logged in!");
 
@@ -46,8 +58,14 @@ export const fetchJSONRequest = <Rq, Rs>(url: string, request: Rq, method: strin
   return fetch(url, requestOptions)
     .then(response => {
       if (!response.ok) {
-        return response.json().then(res => res.detail);
+        return response.json().then(res => ({
+          type: "Error",
+          response: res as Rse
+        }));
       }
-      return response.json() as Promise<Rs>;
+      return response.json().then(res => ({
+        type: "Ok",
+        response: res as Rs
+      }));
     });
 }

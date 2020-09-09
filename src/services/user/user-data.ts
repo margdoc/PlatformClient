@@ -15,8 +15,13 @@ export interface UserDataResponse {
 }
 
 const userDataRequest = <A extends Action>(onResponse: (response: UserDataResponse) => A) => {
-  return fetchJSONRequest<null, UserDataResponse>(USERS_URL + 'me', null, 'GET', true)
-    .then(onResponse);
+  return fetchJSONRequest<null, UserDataResponse, null>(USERS_URL + 'me', null, 'GET', true)
+    .then(response => {
+      if (response.type === "Error")
+        throw new Error("User data request failed");
+      
+      return onResponse(response.response);
+    });
 }
 
 export const apiUserData = <A extends Action>(onResponse: (response: UserDataResponse) => A) => 

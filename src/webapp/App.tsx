@@ -5,6 +5,7 @@ import { Loop, EMPTY, LoopReducer, mapLoop, getState, mapState, defer, batch } f
 import { AuthToken, getAuthToken, setAuthToken, removeAuthToken } from '../utils/auth-token';
 import * as HomePage from './HomePage';
 import * as LoginPage from './LoginPage';
+import * as RegisterPage from './RegisterPage';
 import { AuthClient, UserClient } from '../services';
 
 import { Route, routeFromLocation, routeChanged } from './routes';
@@ -13,6 +14,7 @@ export type Page =
   | { type: "NotFound" }
   | HomePage.State
   | LoginPage.State
+  | RegisterPage.State
 ;
 
 interface LoggedOffState {
@@ -91,6 +93,11 @@ interface LoginPageAction {
   action: LoginPage.Action;
 }
 
+interface RegisterPageAction {
+  type: "RegisterPageAction";
+  action: RegisterPage.Action;
+}
+
 interface InitAction {
   type: "InitAction";
 }
@@ -107,6 +114,7 @@ export type Action =
   | RouteChanged
   | HomePageAction
   | LoginPageAction
+  | RegisterPageAction
 ;
 
 
@@ -237,6 +245,23 @@ export const reducer: LoopReducer<State, Action> = (prevState, action) => {
         }
       )
     }
+
+    if (
+      action.type === "RegisterPageAction" &&
+      prevState.page.type === "RegisterPageState"
+    ) {
+      return mapLoop(
+        RegisterPage.reducer(prevState.page, action.action),
+        registerPage => ({
+          ...prevState,
+          page: registerPage
+        }),
+        registerPageAction => ({
+              type: "RegisterPageAction",
+              action: registerPageAction,
+        })
+      );
+    }
   }
 
   return [prevState, EMPTY];
@@ -250,18 +275,13 @@ export const initialLoop: Loop<State, Action> = [{
   }, defer<FetchLocalStorage>({ type: "FetchLocalStorage" })
 ];
 
-/*AuthClient.apiLogin<LogInResponse>(
-    { username: "mikgrzebieluch@gmail.com", password: "docend66" }, 
-    response => ({
-      type: "LogInResponse",
-      response: response,
-    })
-  )*/
-
 export const render: React.FunctionComponent<Props> = ({ state, dispatch }) => {
   const getNavbar = () => {
     return <>
-      <Button href="/">Home</Button>
+      <Button href="/"
+        onClick={() => {
+          dispatch({ type: "RouteChanged", route: { type: "HomePageRoute" } })
+        }}>Home</Button>
       { state.type === "LoggedInState" 
         ? <>
           <Button>{state.userData?.username || "..."}</Button>
@@ -269,7 +289,16 @@ export const render: React.FunctionComponent<Props> = ({ state, dispatch }) => {
             dispatch({ type: "LogOutResponse" })
           }}>Logout</Button>
         </>
-        : <Button href="/login">Login</Button>
+        : <>
+          <Button href="/login"
+            onClick={() => {
+              dispatch({ type: "RouteChanged", route: { type: "LoginPageRoute" } })
+            }}>Login</Button>
+          <Button href="/register"
+            onClick={() => {
+              dispatch({ type: "RouteChanged", route: { type: "RegisterPageRoute" } })
+            }}>Register</Button>
+        </>
       }
     </>
   };
@@ -285,6 +314,13 @@ export const render: React.FunctionComponent<Props> = ({ state, dispatch }) => {
           return <LoginPage.render dispatch={(action: LoginPage.Action) => {
             dispatch({
               type: "LoginPageAction",
+              action
+            });
+          }} />
+      case "RegisterPageState":
+          return <RegisterPage.render dispatch={(action: RegisterPage.Action) => {
+            dispatch({
+              type: "RegisterPageAction",
               action
             });
           }} />
