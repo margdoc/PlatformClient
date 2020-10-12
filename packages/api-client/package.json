@@ -1,0 +1,29 @@
+{
+  "name": "api-client",
+  "version": "1.0.0",
+  "main": "client/index.ts",
+  "license": "MIT",
+  "scripts": {
+    "api-client:generate": "./generator/cli/run.js --overrideRuntime \"runtime.ts\" \"./definitions/api.yaml\" \"./client\" \"Http/Request/Server\""
+  },
+  "dependencies": {
+    "@openapitools/openapi-generator-cli": "^0.0.17-4.1.1",
+    "@types/js-yaml": "^3.12.2",
+    "swagger2openapi": "^5.3.1"
+  },
+  "devDependencies": {
+    "@oclif/command": "^1.5.19",
+    "@oclif/config": "^1.13.3",
+    "@oclif/plugin-help": "^2.2.1",
+    "@stoplight/prism-cli": "^3.1.0",
+    "heroku": "^7.29.0",
+    "js-yaml": "^3.13.1",
+    "loglevel": "^1.6.4",
+    "swagger-cli": "^2.3.1",
+    "ts-morph": "^4.0.0",
+    "ts-node": "^8.3.0"
+  },
+  "files": [
+    "/generator/cli"
+  ]
+}

@@ -1,0 +1,491 @@
+openapi: 3.0.2
+info:
+  title: FastAPI
+  version: 0.1.0
+paths:
+  /auth/login:
+    post:
+      summary: Login
+      operationId: login
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Body_login_auth_login_post'
+        required: true
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Token'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /auth/register:
+    post:
+      summary: Register
+      operationId: register
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserCreate'
+        required: true
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /users/me:
+    get:
+      summary: Get Me
+      operationId: get_me
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+      security:
+        - AuthBearer: []
+  /users/all:
+    get:
+      summary: Get All Users
+      operationId: get_all_users
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                title: Response Get All Users Users All Get
+                type: array
+                items:
+                  $ref: '#/components/schemas/UserShort'
+      security:
+        - AuthBearer: []
+  '/users/{username}':
+    get:
+      summary: Get User By Uuid
+      operationId: get_user_by_uuid
+      parameters:
+        - required: true
+          schema:
+            title: Uuid
+            type: string
+            format: uuid
+          name: uuid
+          in: query
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+      security:
+        - AuthBearer: []
+  /games/:
+    get:
+      summary: Get Public Games
+      operationId: get_public_games
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                title: Response Get Public Games Games  Get
+                type: array
+                items:
+                  $ref: '#/components/schemas/GameShortGet'
+      security:
+        - AuthBearer: []
+    post:
+      summary: Create Game
+      operationId: create_game
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GamePost'
+        required: true
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateGameResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+      security:
+        - AuthBearer: []
+  '/games/{game_id}/status':
+    get:
+      summary: Get Game Status
+      operationId: get_game_status
+      parameters:
+        - required: true
+          schema:
+            title: Game Id
+            type: string
+          name: game_id
+          in: path
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StatusGet'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+      security:
+        - AuthBearer: []
+  '/games/{game_id}':
+    delete:
+      summary: Delete Game
+      operationId: delete_game
+      parameters:
+        - required: true
+          schema:
+            title: Game Id
+            type: string
+          name: game_id
+          in: path
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+      security:
+        - AuthBearer: []
+  '/games/{game_id}/add_to_game':
+    post:
+      summary: Add To Game
+      operationId: add_to_game
+      parameters:
+        - required: true
+          schema:
+            title: Game Id
+            type: string
+          name: game_id
+          in: path
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StatusGet'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+      security:
+        - AuthBearer: []
+  '/games/{game_id}/connect':
+    post:
+      summary: Connect To Game Without Websocket
+      operationId: connect_to_game_without_websocket
+      parameters:
+        - required: true
+          schema:
+            title: Game Id
+            type: string
+          name: game_id
+          in: path
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+      security:
+        - AuthBearer: []
+components:
+  schemas:
+    Body_login_auth_login_post:
+      title: Body_login_auth_login_post
+      required:
+        - username
+        - password
+      type: object
+      properties:
+        grant_type:
+          title: Grant Type
+          pattern: password
+          type: string
+        username:
+          title: Username
+          type: string
+        password:
+          title: Password
+          type: string
+        scope:
+          title: Scope
+          type: string
+          default: ''
+        client_id:
+          title: Client Id
+          type: string
+        client_secret:
+          title: Client Secret
+          type: string
+    CreateGameResponse:
+      title: CreateGameResponse
+      required:
+        - code
+      type: object
+      properties:
+        code:
+          title: Code
+          type: string
+    GamePost:
+      title: GamePost
+      required:
+        - name
+        - private
+        - maxPlayers
+        - hotJoin
+      type: object
+      properties:
+        name:
+          title: Name
+          type: string
+        password:
+          title: Password
+          type: string
+        private:
+          title: Private
+          type: boolean
+        description:
+          title: Description
+          type: string
+        maxPlayers:
+          title: Maxplayers
+          type: integer
+        hotJoin:
+          title: Hotjoin
+          type: boolean
+    GameShortGet:
+      title: GameShortGet
+      required:
+        - name
+        - hasPassword
+        - players
+        - maxPlayers
+        - status
+        - hotJoin
+        - private
+      type: object
+      properties:
+        name:
+          title: Name
+          type: string
+        hasPassword:
+          title: Haspassword
+          type: boolean
+        description:
+          title: Description
+          type: string
+        players:
+          title: Players
+          type: integer
+        maxPlayers:
+          title: Maxplayers
+          type: integer
+        status:
+          $ref: '#/components/schemas/GameStatus'
+        hotJoin:
+          title: Hotjoin
+          type: boolean
+        private:
+          title: Private
+          type: boolean
+    GameStatus:
+      title: GameStatus
+      enum:
+        - Lobby
+        - NeuroshimaHex
+      type: string
+      description: An enumeration.
+    HTTPValidationError:
+      title: HTTPValidationError
+      type: object
+      properties:
+        detail:
+          title: Detail
+          type: array
+          items:
+            $ref: '#/components/schemas/ValidationError'
+    StatusGet:
+      title: StatusGet
+      required:
+        - status
+      type: object
+      properties:
+        status:
+          $ref: '#/components/schemas/GameStatus'
+    Token:
+      title: Token
+      required:
+        - accessToken
+        - tokenType
+      type: object
+      properties:
+        accessToken:
+          title: Accesstoken
+          type: string
+        tokenType:
+          title: Tokentype
+          type: string
+    User:
+      title: User
+      required:
+        - email
+        - username
+        - name
+        - lastname
+        - uuid
+      type: object
+      properties:
+        email:
+          title: Email
+          type: string
+        username:
+          title: Username
+          type: string
+        name:
+          title: Name
+          type: string
+        lastname:
+          title: Lastname
+          type: string
+        uuid:
+          title: Uuid
+          type: string
+          format: uuid
+        isActive:
+          title: Isactive
+          type: boolean
+          default: true
+        isSuperuser:
+          title: Issuperuser
+          type: boolean
+          default: false
+    UserCreate:
+      title: UserCreate
+      required:
+        - email
+        - username
+        - name
+        - lastname
+        - password
+      type: object
+      properties:
+        email:
+          title: Email
+          type: string
+        username:
+          title: Username
+          type: string
+        name:
+          title: Name
+          type: string
+        lastname:
+          title: Lastname
+          type: string
+        password:
+          title: Password
+          type: string
+    UserShort:
+      title: UserShort
+      required:
+        - username
+        - name
+        - lastname
+      type: object
+      properties:
+        username:
+          title: Username
+          type: string
+        name:
+          title: Name
+          type: string
+        lastname:
+          title: Lastname
+          type: string
+    ValidationError:
+      title: ValidationError
+      required:
+        - loc
+        - msg
+        - type
+      type: object
+      properties:
+        loc:
+          title: Location
+          type: array
+          items:
+            type: string
+        msg:
+          title: Message
+          type: string
+        type:
+          title: Error Type
+          type: string
+  securitySchemes:
+    AuthBearer:
+      type: oauth2
+      flows:
+        password:
+          scopes: {}
+          tokenUrl: auth/login
+host: localhost
+schemes:
+  - https

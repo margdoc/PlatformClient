@@ -1,0 +1,15 @@
+{
+  "dev": {
+    "host": "localhost",
+    "schemes": [
+      "https"
+    ]
+  },
+  "prod": {
+    "host": "localhost",
+    "schemes": [
+      "https"
+    ]
+  },
+  "defaultEnvironment": "prod"
+}
